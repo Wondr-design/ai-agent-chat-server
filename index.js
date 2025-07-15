@@ -3,10 +3,8 @@ import cors from "cors";
 import crypto from "crypto";
 import axios from "axios";
 import dotenv from "dotenv";
-dotenv.config();
-import "./instrument.js";
 
-// All other imports below
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -183,7 +181,7 @@ app.post("/webhook", async (req, res) => {
     const body = req.body;
 
     if (body.object === "instagram") {
-      for (const entry of body.entry || []) {
+      body.entry?.forEach(async (entry) => {
         const webhookEvent = entry.messaging?.[0];
 
         if (webhookEvent?.message) {
@@ -229,7 +227,7 @@ app.post("/webhook", async (req, res) => {
             }, Math.random() * 3000 + 2000); // 2-5 second delay
           }
         }
-      }
+      });
     }
 
     res.status(200).send("EVENT_RECEIVED");
@@ -459,7 +457,7 @@ app.get("/health", (req, res) => {
 });
 
 // Start server
-const server = app.listen(PORT, () => {
+app.listen(PORT, () => {
   console.log(`🚀 Instagram AI Chatbot server running on port ${PORT}`);
   console.log(`📱 Webhook URL: http://localhost:${PORT}/webhook`);
   console.log(`🔧 Admin dashboard: http://localhost:5173`);
