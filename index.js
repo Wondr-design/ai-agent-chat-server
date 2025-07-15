@@ -11,7 +11,13 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(
+  express.json({
+    verify: (req, res, buf) => {
+      req.rawBody = buf.toString();
+    },
+  })
+);
 app.use(express.urlencoded({ extended: true }));
 
 // Validate required environment variables
@@ -184,7 +190,7 @@ app.get("/webhook", (req, res) => {
 app.post("/webhook", async (req, res) => {
   try {
     const xHubSignature = req.get("x-hub-signature-256");
-    const payload = JSON.stringify(req.body);
+    const payload = req.rawBody;
 
     if (!verifyWebhookSignature(payload, xHubSignature)) {
       console.error("Webhook signature verification failed");
